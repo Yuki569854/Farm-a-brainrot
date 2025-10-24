@@ -1,0 +1,203 @@
+--// My Frog Pond! GUI Script (Final Complete & Fixed Version)
+-- PlaceID: 123852068581512
+-- by LEE_Yukii
+
+if game.PlaceId ~= 123852068581512 then
+    return game.Players.LocalPlayer:Kick("Wrong Game! Run this only in My Frog Pond!")
+end
+
+-- Load Rayfield
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+    Name = "My Frog Pond! | Main Hub",
+    LoadingTitle = "Loading Script Hub...",
+    LoadingSubtitle = "by LEE_Yukii",
+    ConfigurationSaving = {
+        Enabled = true,
+        FolderName = "MyFrogPondHub",
+        FileName = "MainSettings"
+    },
+    Discord = {Enabled = false},
+    KeySystem = false
+})
+
+---------------------------------------------------
+-- 🟢 TAB 1: AUTO PICKUP (Stable Version)
+---------------------------------------------------
+local Tab1 = Window:CreateTab("Auto Pickup", 4483362458)
+local Section1 = Tab1:CreateSection("Auto Pickup Settings")
+
+local autoPickup = false
+
+Tab1:CreateToggle({
+    Name = "AutoPickUp Acorns",
+    CurrentValue = false,
+    Flag = "AutoPickupToggle",
+    Callback = function(Value)
+        autoPickup = Value
+        if Value then
+            Rayfield:Notify({
+                Title = "Auto Pickup",
+                Content = "Auto Pickup Activated!",
+                Duration = 3
+            })
+            task.spawn(function()
+                while autoPickup do
+                    pcall(function()
+                        local acorns = workspace:WaitForChild("AcornHunt"):WaitForChild("Acorns")
+                        for _, v in pairs(acorns:GetChildren()) do
+                            if v:IsA("BasePart") then
+                                local args = {v}
+                                game:GetService("ReplicatedStorage"):WaitForChild("AcornHuntComms")
+                                    :WaitForChild("RF"):WaitForChild("PickupAcorn")
+                                    :InvokeServer(unpack(args))
+                            end
+                        end
+                    end)
+                    task.wait(2)
+                end
+            end)
+        else
+            Rayfield:Notify({
+                Title = "Auto Pickup",
+                Content = "Auto Pickup Disabled!",
+                Duration = 3
+            })
+        end
+    end,
+})
+
+---------------------------------------------------
+-- 🟣 TAB 2: AUTO BUY GEARS
+---------------------------------------------------
+local Tab2 = Window:CreateTab("Auto Buy Gears", 4483362458)
+local Section2 = Tab2:CreateSection("Auto Buy Gears")
+
+local Gears = {
+    "Frog Labeler",
+    "Dripleaf Pad",
+    "Emberleaf Pad",
+    "Azureleaf Pad",
+    "Swamp Soother",
+    "Pondlight Orb",
+    "Frogtag Charm",
+    "Runechime Pillar",
+    "Pondmother’s Phial",
+    "Asterviel Catalyst"
+}
+
+for _, gearName in ipairs(Gears) do
+    local running = false
+
+    Tab2:CreateToggle({
+        Name = "AutoBuy " .. gearName,
+        CurrentValue = false,
+        Flag = "AutoBuy_" .. gearName,
+        Callback = function(Value)
+            running = Value
+            if Value then
+                Rayfield:Notify({
+                    Title = "Auto Buy",
+                    Content = "Started buying: " .. gearName,
+                    Duration = 3
+                })
+                task.spawn(function()
+                    while running do
+                        pcall(function()
+                            local args = {gearName}
+                            game:GetService("ReplicatedStorage")
+                                :WaitForChild("GearShopComms")
+                                :WaitForChild("RF")
+                                :WaitForChild("OnPurchaseItem")
+                                :InvokeServer(unpack(args))
+                        end)
+                        task.wait(2)
+                    end
+                end)
+            else
+                Rayfield:Notify({
+                    Title = "Auto Buy",
+                    Content = "Stopped buying: " .. gearName,
+                    Duration = 3
+                })
+            end
+        end,
+    })
+end
+
+---------------------------------------------------
+-- 🐸 TAB 3: AUTO BUY FROGS/TADPOLES (Ordered)
+---------------------------------------------------
+local Tab3 = Window:CreateTab("Auto Buy Frogs", 4483362458)
+local Section3 = Tab3:CreateSection("Auto Buy Frogs")
+
+-- Maintain desired order
+local FrogOrder = {
+    "Chronogear Toad",
+    "Crystalback Toad",
+    "Voltcloud Toad",
+    "Shadow Hopper",
+    "Astro Frog",
+    "Candelune Toad",
+    "Runesage Frog",
+    "Arcana Toad"
+}
+
+-- Tadpole ↔ Frog mapping
+local FrogMapping = {
+    ["Chronogear Toad"] = "Chronogear Tadpole",
+    ["Crystalback Toad"] = "Crystalback Tadpole",
+    ["Voltcloud Toad"] = "Voltcloud Tadpole",
+    ["Shadow Hopper"] = "Shadow Hopper Tadpole",
+    ["Astro Frog"] = "Astro Tadpole",
+    ["Candelune Toad"] = "Candelune Tadpole",
+    ["Runesage Frog"] = "Runesage Tadpole",
+    ["Arcana Toad"] = "Arcana Tadpole",
+}
+
+for _, frogName in ipairs(FrogOrder) do
+    local tadpoleName = FrogMapping[frogName]
+    local running = false
+
+    Tab3:CreateToggle({
+        Name = "AutoBuy " .. frogName,
+        CurrentValue = false,
+        Flag = "AutoBuy_" .. frogName,
+        Callback = function(Value)
+            running = Value
+            if Value then
+                Rayfield:Notify({
+                    Title = "Auto Buy",
+                    Content = "Started buying: " .. frogName,
+                    Duration = 3
+                })
+                task.spawn(function()
+                    while running do
+                        pcall(function()
+                            local args = {tadpoleName, frogName}
+                            game:GetService("ReplicatedStorage")
+                                :WaitForChild("TadpoleShopComms")
+                                :WaitForChild("RF")
+                                :WaitForChild("OnPurchaseItem")
+                                :InvokeServer(unpack(args))
+                        end)
+                        task.wait(2)
+                    end
+                end)
+            else
+                Rayfield:Notify({
+                    Title = "Auto Buy",
+                    Content = "Stopped buying: " .. frogName,
+                    Duration = 3
+                })
+            end
+        end,
+    })
+end
+
+---------------------------------------------------
+Rayfield:LoadConfiguration()
+---------------------------------------------------
+
+print("✅ My Frog Pond! | Full Script Loaded Successfully")
